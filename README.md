@@ -29,16 +29,16 @@ The final run covered July to November 2019: an initial training cycle, three mo
 
 | Cutoff | Winner | Evaluation month | Recall at 0.5%: challenger vs incumbent | Decision | Report |
 | --- | --- | --- | --- | --- | --- |
-| 2019-07-08 | XGBoost | June | 52.6% | Initial promotion | [cycle](docs/reports/training/cycle-2019-07-08/report.html) |
-| 2019-08-08 | XGBoost | July | 66.2% vs 63.6% | Promote | [cycle](docs/reports/training/cycle-2019-08-08/report.html) |
-| 2019-09-08 | Histogram boosting | August | 60.0% vs 57.0% | Promote | [cycle](docs/reports/training/cycle-2019-09-08/report.html) |
-| 2019-10-08 | XGBoost | September | 61.3% vs 60.6% | Keep current | [cycle](docs/reports/training/cycle-2019-10-08/report.html) |
+| 2019-07-08 | XGBoost | June | 52.6% | Initial promotion | [cycle](https://rafjasn.github.io/fraud-risk-platform/reports/training/cycle-2019-07-08/report.html) |
+| 2019-08-08 | XGBoost | July | 66.2% vs 63.6% | Promote | [cycle](https://rafjasn.github.io/fraud-risk-platform/reports/training/cycle-2019-08-08/report.html) |
+| 2019-09-08 | Histogram boosting | August | 60.0% vs 57.0% | Promote | [cycle](https://rafjasn.github.io/fraud-risk-platform/reports/training/cycle-2019-09-08/report.html) |
+| 2019-10-08 | XGBoost | September | 61.3% vs 60.6% | Keep current | [cycle](https://rafjasn.github.io/fraud-risk-platform/reports/training/cycle-2019-10-08/report.html) |
 
 On October 2019 (145,074 transactions, 275 frauds), the final model caught 62.5% of frauds (95% interval 57.3–67.8%) and the first model 62.2%: the monthly updates did not measurably improve on it. While deployed, the models caught 58–63% of each month's fraud.
 
 ![Precision-recall and frauds caught by review volume for the three deployed models on the October 2019 holdout](docs/reports/final-evaluation/comparison.png)
 
-Reports: [holdout evaluation](docs/reports/final-evaluation/report.html) · [monitoring of deployed models](docs/reports/monitoring/2019-11-08/report.html) · [initial data snapshot](docs/reports/data/snapshot-2019-07-08.html) · [all reports](docs/reports/README.md) · [full results and evaluation context](docs/RESULTS.md#final-experiment). The reports are self-contained HTML; on GitHub, open them through GitHub Pages or download them.
+Reports: [holdout evaluation](https://rafjasn.github.io/fraud-risk-platform/reports/final-evaluation/report.html) · [monitoring of deployed models](https://rafjasn.github.io/fraud-risk-platform/reports/monitoring/2019-11-08/report.html) · [initial data snapshot](https://rafjasn.github.io/fraud-risk-platform/reports/data/snapshot-2019-07-08.html) · [all reports](https://rafjasn.github.io/fraud-risk-platform/reports/) · [full results and evaluation context](docs/RESULTS.md#final-experiment).
 
 ## Run it
 
