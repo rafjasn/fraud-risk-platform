@@ -1,0 +1,122 @@
+# Default values for the fraud-risk-platform chart.
+
+nameOverride: ""
+fullnameOverride: ""
+
+# The project's own images, built by `make setup`, and the third-party images it uses.
+# On a local kind cluster, load the project images with `make k8s-images`.
+images:
+  training:
+    repository: fraud-risk-training
+    tag: local
+    pullPolicy: IfNotPresent
+  serving:
+    repository: fraud-risk-serving
+    tag: local
+    pullPolicy: IfNotPresent
+  postgres:
+    repository: postgres
+    tag: 17.6-bookworm
+    pullPolicy: IfNotPresent
+  localstack:
+    repository: localstack/localstack
+    tag: 4.14.0
+    pullPolicy: IfNotPresent
+  test:
+    repository: busybox
+    tag: "1.36"
+    pullPolicy: IfNotPresent
+
+# Database and S3 credentials. The defaults are the local development credentials used
+# by Docker Compose; they are only for a local cluster. Anywhere else, create a Secret
+# with the keys listed in templates/secret.yaml and name it in existingSecret. Use
+# passwords without URL-reserved characters, because they are placed in connection URLs.
+credentials:
+  existingSecret: ""
+  postgresPassword: fraud
+  sourceAppPassword: local-source
+  sourceReaderPassword: local-source-reader
+  platformAppPassword: local-platform
+  mlflowAppPassword: local-mlflow
+  # LocalStack accepts any credentials.
+  awsAccessKeyId: test
+  awsSecretAccessKey: test
+
+# Shared state: releases, deployment.json, and cycle and monitoring reports. Jobs write
+# it and the API reads it, so on a cluster with several nodes it needs a storage class
+# that supports ReadWriteMany.
+state:
+  size: 20Gi
+  storageClassName: ""
+  accessMode: ReadWriteOnce
+
+postgres:
+  # The IBM source database alone takes about 15 GB.
+  storage:
+    size: 30Gi
+    storageClassName: ""
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      memory: 2Gi
+
+localstack:
+  # S3 is kept in memory and lost when the pod restarts; run `initial-snapshot` to rebuild.
+  buckets:
+    data: fraud-data
+    mlflow: fraud-mlflow
+  region: us-east-1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      memory: 3Gi
+
+mlflow:
+  experiment: fraud-risk-training-v2
+  artifactUri: s3://fraud-mlflow/training-v2
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      memory: 1Gi
+
+api:
+  replicas: 1
+  # Pin a release by ID. Empty means the release selected in deployment.json, which
+  # `make k8s-promote` and `make k8s-rollback` change.
+  releaseId: ""
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      memory: 1Gi
+
+# Every platform command runs as a Job with these settings: setup, snapshots, training.
+jobs:
+  threads: 4
+  duckdbMemoryLimit: 2GB
+  resources:
+    requests:
+      cpu: "1"
+      memory: 2Gi
+    limits:
+      memory: 6Gi
+
+# The monthly workflow as a CronJob. Suspended by default: run a month on demand with
+# `make k8s-month`, or set suspend to false to run it on the schedule.
+month:
+  schedule: "0 3 1 * *"
+  suspend: true
+  trials: 20
+  # A month includes a training cycle, which took 30-45 minutes on a laptop.
+  activeDeadlineSeconds: 14400
+
+# One platform command as a Job, rendered only by scripts/k8s-task.sh. Leave empty.
+task:
+  args: []

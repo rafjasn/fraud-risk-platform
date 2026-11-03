@@ -1,0 +1,316 @@
+{
+  "schema_version": 2,
+  "review_budget": 0.005,
+  "minimum_recall_gain": 0.02,
+  "minimum_rows_per_split": 100,
+  "minimum_frauds_per_split": 5,
+  "initial_recipe": "logistic_history",
+  "challengers": [
+    "boosting_history",
+    "xgboost_history",
+    "mlp_history",
+    "spline_history",
+    "logistic_transactions"
+  ],
+  "search": {
+    "trials": 20,
+    "seed": 42
+  },
+  "recipes": {
+    "logistic_basic": {
+      "estimator": "logistic",
+      "parameters": {
+        "max_iter": 1000,
+        "C": 1.0,
+        "solver": "newton-cholesky",
+        "random_state": 42
+      },
+      "search_space": {
+        "C": {
+          "kind": "float",
+          "low": 0.1,
+          "high": 100.0,
+          "log": true
+        }
+      }
+    },
+    "boosting_basic": {
+      "estimator": "hist_gradient_boosting",
+      "parameters": {
+        "learning_rate": 0.1,
+        "max_iter": 100,
+        "max_leaf_nodes": 15,
+        "early_stopping": false,
+        "random_state": 42
+      }
+    },
+    "logistic_transactions": {
+      "estimator": "logistic",
+      "parameters": {
+        "max_iter": 1000,
+        "C": 1.0,
+        "solver": "newton-cholesky",
+        "random_state": 42
+      },
+      "search_space": {
+        "C": {
+          "kind": "float",
+          "low": 0.1,
+          "high": 100.0,
+          "log": true
+        }
+      },
+      "feature_set": "transaction_details"
+    },
+    "boosting_transactions": {
+      "estimator": "hist_gradient_boosting",
+      "parameters": {
+        "learning_rate": 0.1,
+        "max_iter": 100,
+        "max_leaf_nodes": 15,
+        "early_stopping": false,
+        "random_state": 42
+      },
+      "feature_set": "transaction_details"
+    },
+    "logistic_behavior": {
+      "estimator": "logistic",
+      "parameters": {
+        "max_iter": 1000,
+        "C": 1.0,
+        "solver": "newton-cholesky",
+        "random_state": 42
+      },
+      "search_space": {
+        "C": {
+          "kind": "float",
+          "low": 0.1,
+          "high": 100.0,
+          "log": true
+        }
+      },
+      "feature_set": "card_behavior"
+    },
+    "logistic_history": {
+      "estimator": "logistic",
+      "parameters": {
+        "max_iter": 1000,
+        "C": 1.0,
+        "solver": "newton-cholesky",
+        "random_state": 42
+      },
+      "search_space": {
+        "C": {
+          "kind": "float",
+          "low": 0.1,
+          "high": 100.0,
+          "log": true
+        }
+      },
+      "feature_set": "card_history"
+    },
+    "boosting_history": {
+      "estimator": "hist_gradient_boosting",
+      "parameters": {
+        "learning_rate": 0.1,
+        "max_iter": 200,
+        "max_leaf_nodes": 47,
+        "min_samples_leaf": 20,
+        "l2_regularization": 50.0,
+        "early_stopping": false,
+        "random_state": 42
+      },
+      "search_space": {
+        "learning_rate": {
+          "kind": "float",
+          "low": 0.02,
+          "high": 0.15,
+          "log": true
+        },
+        "max_leaf_nodes": {
+          "kind": "int",
+          "low": 15,
+          "high": 127
+        },
+        "l2_regularization": {
+          "kind": "float",
+          "low": 1.0,
+          "high": 300.0,
+          "log": true
+        }
+      },
+      "feature_set": "card_history"
+    },
+    "xgboost_history": {
+      "estimator": "xgboost",
+      "parameters": {
+        "n_estimators": 800,
+        "learning_rate": 0.03,
+        "max_depth": 6,
+        "min_child_weight": 2.0,
+        "subsample": 0.8,
+        "colsample_bytree": 0.8,
+        "reg_lambda": 15.0,
+        "tree_method": "hist",
+        "random_state": 42
+      },
+      "search_space": {
+        "n_estimators": {
+          "kind": "int",
+          "low": 200,
+          "high": 2000,
+          "log": true
+        },
+        "learning_rate": {
+          "kind": "float",
+          "low": 0.01,
+          "high": 0.15,
+          "log": true
+        },
+        "max_depth": {
+          "kind": "int",
+          "low": 3,
+          "high": 10
+        },
+        "min_child_weight": {
+          "kind": "float",
+          "low": 0.1,
+          "high": 20.0,
+          "log": true
+        },
+        "reg_lambda": {
+          "kind": "float",
+          "low": 1.0,
+          "high": 100.0,
+          "log": true
+        }
+      },
+      "feature_set": "card_history"
+    },
+    "mlp_history": {
+      "estimator": "mlp",
+      "parameters": {
+        "hidden_units": 64,
+        "hidden_layers": 2,
+        "dropout": 0.1,
+        "learning_rate": 0.001,
+        "weight_decay": 1e-05,
+        "epochs": 10,
+        "batch_size": 1024,
+        "pos_weight": 2.0,
+        "random_state": 42
+      },
+      "search_space": {
+        "hidden_units": {
+          "kind": "int",
+          "low": 16,
+          "high": 256,
+          "log": true
+        },
+        "hidden_layers": {
+          "kind": "int",
+          "low": 1,
+          "high": 3
+        },
+        "dropout": {
+          "kind": "float",
+          "low": 0.0,
+          "high": 0.5
+        },
+        "learning_rate": {
+          "kind": "float",
+          "low": 0.0001,
+          "high": 0.01,
+          "log": true
+        },
+        "epochs": {
+          "kind": "int",
+          "low": 3,
+          "high": 20
+        },
+        "pos_weight": {
+          "kind": "float",
+          "low": 1.0,
+          "high": 20.0,
+          "log": true
+        }
+      },
+      "feature_set": "card_history"
+    },
+    "spline_history": {
+      "estimator": "logistic",
+      "numeric_encoding": "quantile_spline",
+      "parameters": {
+        "max_iter": 1000,
+        "C": 10.0,
+        "solver": "newton-cholesky",
+        "random_state": 42
+      },
+      "feature_set": "card_history"
+    }
+  },
+  "feature_sets": {
+    "transaction_details": {
+      "version": "transaction-v1",
+      "numeric": [
+        "amount",
+        "log_abs_amount",
+        "is_refund",
+        "hour_sin",
+        "hour_cos"
+      ],
+      "categorical": [
+        "use_chip",
+        "mcc",
+        "day_of_week"
+      ]
+    },
+    "card_behavior": {
+      "version": "history-v1",
+      "numeric": [
+        "amount",
+        "log_abs_amount",
+        "is_refund",
+        "hour_sin",
+        "hour_cos",
+        "card_count_1h",
+        "card_count_24h",
+        "card_count_7d",
+        "card_amount_sum_24h",
+        "amount_vs_card_mean_30d",
+        "hours_since_card_last",
+        "new_merchant_for_card_30d",
+        "new_mcc_for_card_30d"
+      ],
+      "categorical": [
+        "use_chip",
+        "mcc",
+        "day_of_week"
+      ]
+    },
+    "card_history": {
+      "version": "history-v1",
+      "numeric": [
+        "amount",
+        "log_abs_amount",
+        "is_refund",
+        "hour_sin",
+        "hour_cos",
+        "card_count_1h",
+        "card_count_24h",
+        "card_count_7d",
+        "card_amount_sum_24h",
+        "amount_vs_card_mean_30d",
+        "hours_since_card_last",
+        "new_merchant_for_card_30d",
+        "new_mcc_for_card_30d",
+        "card_confirmed_frauds_30d"
+      ],
+      "categorical": [
+        "use_chip",
+        "mcc",
+        "day_of_week"
+      ]
+    }
+  }
+}

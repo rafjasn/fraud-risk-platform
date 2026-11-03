@@ -1,0 +1,45 @@
+# checkov runs on every change (make infra-check). These checks are skipped on
+# purpose: each is a cost or scope choice for a single-account portfolio deployment,
+# recorded here so the decision is visible and reviewable. Everything else must pass.
+framework:
+  - terraform
+skip-path:
+  - .terraform
+  - tests
+compact: true
+quiet: true
+skip-check:
+  # Customer-managed KMS keys. Every store is encrypted with AWS-managed keys; CMKs
+  # add key policies and per-key cost without changing who can read data here.
+  - CKV_AWS_136 # ECR
+  - CKV_AWS_145 # S3
+  - CKV_AWS_149 # Secrets Manager
+  - CKV_AWS_158 # CloudWatch Logs
+  - CKV_AWS_184 # EFS
+  - CKV_AWS_297 # EventBridge Scheduler
+  - CKV_AWS_354 # RDS Performance Insights
+  # Availability and durability beyond a demonstration. Multi-AZ is a variable
+  # (db_multi_az); snapshots and objects can be rebuilt from the retained source.
+  - CKV_AWS_157 # RDS Multi-AZ
+  - CKV_AWS_144 # S3 cross-region replication
+  # Extra logging and monitoring with per-GB or per-instance cost. Application logs,
+  # RDS logs and Performance Insights, Container Insights, and alarms are enabled.
+  - CKV2_AWS_11 # VPC flow logs
+  - CKV_AWS_18  # S3 server access logs
+  - CKV_AWS_91  # load balancer access logs
+  - CKV_AWS_118 # RDS enhanced monitoring
+  - CKV_AWS_338 # one-year log retention; log_retention_days is a variable
+  - CKV2_AWS_62 # S3 event notifications; nothing consumes them
+  # Edge protection. A WAF web ACL costs a monthly fee per rule set.
+  - CKV2_AWS_28
+  # TLS ends at the load balancer (HTTPS when api_certificate_arn is set); traffic
+  # to API tasks stays inside the VPC.
+  - CKV_AWS_378
+  # Applications connect with passwords from Secrets Manager. The RDS-managed master
+  # secret rotates; rotating application passwords needs a rotation function and
+  # restarts, and IAM database authentication would need token-aware clients.
+  - CKV2_AWS_57
+  - CKV_AWS_161
+  # False positive: the groups are attached through for_each maps and module inputs
+  # (ECS services, run-task networking, SageMaker VpcConfig) that checkov does not follow.
+  - CKV2_AWS_5

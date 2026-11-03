@@ -1,0 +1,28 @@
+# One simulated month: replay, next snapshot, monitoring, training. It stops at the
+# training recommendation, because promotion stays an explicit step. Suspended by default;
+# `make k8s-month` starts a run on demand.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "frp.fullname" . }}-month
+  labels:
+    {{- include "frp.labels" (dict "ctx" $ "component" "month") | nindent 4 }}
+spec:
+  schedule: {{ .Values.month.schedule | quote }}
+  suspend: {{ .Values.month.suspend }}
+  # A month must never overlap the previous one.
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      # A failed month is rerun by hand; the training ledger records each attempt.
+      backoffLimit: 0
+      activeDeadlineSeconds: {{ .Values.month.activeDeadlineSeconds }}
+      ttlSecondsAfterFinished: 604800
+      template:
+        metadata:
+          labels:
+            {{- include "frp.labels" (dict "ctx" $ "component" "month") | nindent 12 }}
+        spec:
+          {{- include "frp.commandPodSpec" (dict "ctx" $ "args" (list "month" "--trials" .Values.month.trials)) | nindent 10 }}

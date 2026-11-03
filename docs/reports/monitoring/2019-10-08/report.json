@@ -1,0 +1,100 @@
+{
+  "plots": [
+    "monitoring.png"
+  ],
+  "schema_version": 1,
+  "simulation_clock": "2019-10-08T00:00:00",
+  "simulation_id": "0c2fdbba3baa4f88879de300a1248df5",
+  "windows": [
+    {
+      "alert_rate": 0.004596325659191971,
+      "average_precision": 0.42835425354193774,
+      "caught": 122,
+      "expected": {
+        "alert_rate": 0.004410143329658214,
+        "average_precision": 0.3478940918313967,
+        "precision": 0.1751592356687898,
+        "recall": 0.5116279069767442,
+        "recall_at_budget": 0.5255813953488372
+      },
+      "flagged": 676,
+      "frauds": 198,
+      "mature": 147074,
+      "pending": 0,
+      "precision": 0.1804733727810651,
+      "recall": 0.6161616161616161,
+      "recall_at_budget": 0.6161616161616161,
+      "recipe_name": "xgboost_history",
+      "recorded_at_clock": "2019-07-08T00:00:00",
+      "rejected": {},
+      "release_id": "75c451f50e78a0f85033e74fed01762eab8c7a49d2b6cc3b2f21705e9a345307",
+      "replay_id": "5e3a6a15-0ff0-4b8b-8e6b-f426050f2d4a",
+      "review_budget": 0.005,
+      "transactions": 147074,
+      "window": [
+        "2019-07-08T00:00:00",
+        "2019-08-08T00:00:00"
+      ]
+    },
+    {
+      "alert_rate": 0.00511625688923406,
+      "average_precision": 0.3775433765562334,
+      "caught": 132,
+      "expected": {
+        "alert_rate": 0.004568628281715601,
+        "average_precision": 0.4471719663314953,
+        "precision": 0.1545595054095827,
+        "recall": 0.6493506493506493,
+        "recall_at_budget": 0.6623376623376623
+      },
+      "flagged": 751,
+      "frauds": 226,
+      "mature": 146787,
+      "pending": 0,
+      "precision": 0.17576564580559254,
+      "recall": 0.584070796460177,
+      "recall_at_budget": 0.584070796460177,
+      "recipe_name": "xgboost_history",
+      "recorded_at_clock": "2019-08-08T00:00:00",
+      "rejected": {},
+      "release_id": "1798983a06d52cca7fabd8f8a40d71234bdcadd39cd766b18b516a25fb200afa",
+      "replay_id": "060b343f-7e7a-4bfb-9156-71fc6f003f45",
+      "review_budget": 0.005,
+      "transactions": 146787,
+      "window": [
+        "2019-08-08T00:00:00",
+        "2019-09-08T00:00:00"
+      ]
+    },
+    {
+      "alert_rate": 0.004367336843221088,
+      "average_precision": 0.2549525463406171,
+      "caught": 50,
+      "expected": {
+        "alert_rate": 0.00567466651665483,
+        "average_precision": 0.40698986813001947,
+        "precision": 0.1771995043370508,
+        "recall": 0.6085106382978723,
+        "recall_at_budget": 0.6
+      },
+      "flagged": 618,
+      "frauds": 90,
+      "mature": 108534,
+      "pending": 32971,
+      "precision": 0.10964912280701754,
+      "recall": 0.5555555555555556,
+      "recall_at_budget": 0.5666666666666667,
+      "recipe_name": "boosting_history",
+      "recorded_at_clock": "2019-09-08T00:00:00",
+      "rejected": {},
+      "release_id": "020564a33e19e303fc69012040588d46a8fe6cb7e916956db09dbfc2d05aa10f",
+      "replay_id": "b7804a51-3ff3-4510-80b1-3d45bbfdeb4f",
+      "review_budget": 0.005,
+      "transactions": 141505,
+      "window": [
+        "2019-09-08T00:00:00",
+        "2019-10-08T00:00:00"
+      ]
+    }
+  ]
+}

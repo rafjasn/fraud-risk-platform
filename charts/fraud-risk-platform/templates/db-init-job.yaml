@@ -1,0 +1,20 @@
+# Creates the application tables after every install and upgrade. `init-db` is additive,
+# so rerunning it never touches existing data.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "frp.fullname" . }}-db-init
+  labels:
+    {{- include "frp.labels" (dict "ctx" $ "component" "db-init") | nindent 4 }}
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 3
+  activeDeadlineSeconds: 600
+  template:
+    metadata:
+      labels:
+        {{- include "frp.labels" (dict "ctx" $ "component" "db-init") | nindent 8 }}
+    spec:
+      {{- include "frp.commandPodSpec" (dict "ctx" $ "args" (list "init-db")) | nindent 6 }}

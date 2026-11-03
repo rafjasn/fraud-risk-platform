@@ -1,0 +1,33 @@
+# `helm test`: the API answers on its Service. Readiness needs a deployed release, so the
+# test checks liveness, which holds from the first start.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ include "frp.fullname" . }}-test-api-health
+  labels:
+    {{- include "frp.labels" (dict "ctx" $ "component" "test") | nindent 4 }}
+  annotations:
+    helm.sh/hook: test
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  serviceAccountName: {{ include "frp.fullname" . }}
+  restartPolicy: Never
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 65534
+    runAsGroup: 65534
+    seccompProfile:
+      type: RuntimeDefault
+  containers:
+    - name: wget
+      image: {{ include "frp.image" .Values.images.test }}
+      imagePullPolicy: {{ .Values.images.test.pullPolicy }}
+      command: ["wget", "-q", "-O", "-", "http://{{ include "frp.apiHost" . }}:8000/health"]
+      resources:
+        requests:
+          cpu: 10m
+          memory: 16Mi
+        limits:
+          memory: 32Mi
+      securityContext:
+        {{- include "frp.containerSecurityContext" . | nindent 8 }}

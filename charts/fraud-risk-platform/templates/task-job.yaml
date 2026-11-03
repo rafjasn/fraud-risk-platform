@@ -1,0 +1,19 @@
+{{- if .Values.task.args }}
+# One platform command as a Job. Rendered only by scripts/k8s-task.sh, which sets
+# task.args and creates the Job with a generated name; an installed release has none.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  generateName: {{ include "frp.fullname" . }}-task-
+  labels:
+    {{- include "frp.labels" (dict "ctx" $ "component" "task") | nindent 4 }}
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: 86400
+  template:
+    metadata:
+      labels:
+        {{- include "frp.labels" (dict "ctx" $ "component" "task") | nindent 8 }}
+    spec:
+      {{- include "frp.commandPodSpec" (dict "ctx" $ "args" .Values.task.args) | nindent 6 }}
+{{- end }}

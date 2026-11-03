@@ -1,0 +1,41 @@
+{
+  "verified_on": "2026-10-02",
+  "source_revision": "ebb7cd68ee1897599568107740bc452104bbbaf8",
+  "archive_sha256": "e9f589a0958f40d60f81b1a2e8428db86e00c05755caf44fb055827976c0efa2",
+  "adapter_version": 1,
+  "full_archive_parser_validation": {
+    "rows": 24386900,
+    "frauds": 29757,
+    "first_transaction": "1991-01-02 07:10:00",
+    "last_transaction": "2020-02-28 23:58:00"
+  },
+  "postgresql_subset_import": {
+    "dataset": "ibm-tabformer",
+    "import_id": "083ef40ccd07df8f02d3638d0b623c4046a6626ea54b9edba4c3b8b567be33c6",
+    "status": "complete",
+    "scanned_rows": 24386900,
+    "imported_rows": 295448,
+    "inserted_rows": 295448,
+    "customer_limit": 20,
+    "frauds": 301,
+    "first_transaction": "1998-01-01 10:01:00",
+    "last_transaction": "2020-02-28 23:49:00"
+  },
+  "postgresql_repeat_import": {
+    "dataset": "ibm-tabformer",
+    "import_id": "083ef40ccd07df8f02d3638d0b623c4046a6626ea54b9edba4c3b8b567be33c6",
+    "status": "complete",
+    "scanned_rows": 24386900,
+    "imported_rows": 295448,
+    "inserted_rows": 0,
+    "customer_limit": 20,
+    "frauds": 301,
+    "first_transaction": "1998-01-01 10:01:00",
+    "last_transaction": "2020-02-28 23:49:00"
+  },
+  "limits": [
+    "The full corpus was parsed and validated, but only the 20-user subset was imported into PostgreSQL.",
+    "Verification used the local Python environment and an isolated PostgreSQL 17.6 container; application images were not rebuilt.",
+    "IBM training, snapshots, reporting, LocalStack, and AWS deployment were not exercised by this source-loading check."
+  ]
+}

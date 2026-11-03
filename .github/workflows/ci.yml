@@ -1,0 +1,70 @@
+name: Local reference checks
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    # Unit and PostgreSQL/LocalStack integration tests, then four image builds.
+    timeout-minutes: 45
+    services:
+      postgres:
+        image: postgres:17.6-bookworm
+        env:
+          POSTGRES_USER: fraud
+          POSTGRES_PASSWORD: fraud
+          POSTGRES_DB: fraud_test
+        ports: ["5432:5432"]
+        options: --health-cmd "pg_isready -U fraud -d fraud_test" --health-interval 2s --health-timeout 5s --health-retries 30
+      localstack:
+        image: localstack/localstack:4.14.0
+        env:
+          SERVICES: s3
+          PERSISTENCE: "0"
+        ports: ["4566:4566"]
+        options: --health-cmd "awslocal s3api list-buckets" --health-interval 3s --health-timeout 5s --health-retries 60
+    env:
+      TEST_DATABASE_URL: postgresql://fraud:fraud@localhost:5432/fraud_test
+      TEST_S3_ENDPOINT_URL: http://localhost:4566
+      MPLCONFIGDIR: /tmp/matplotlib
+      MLFLOW_DISABLE_AGENT_HINT: "1"
+      OMP_NUM_THREADS: "2"
+      OPENBLAS_NUM_THREADS: "2"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: 0.12.17
+          enable-cache: true
+      - run: uv sync --locked --all-extras
+      - run: make lint
+      - run: uv run --locked --all-extras pytest -q
+      - run: make setup
+      - run: make check-ingestion-image
+      - run: docker build --target training-sagemaker --build-arg GIT_COMMIT=${{ github.sha }} --build-arg GIT_DIRTY=false -t fraud-risk-training-sagemaker:local .
+      - run: uv run --locked --all-extras pytest -q tests/test_training.py::test_sagemaker_entrypoint_uses_prepared_files
+        env:
+          TRAINING_CONTRACT_IMAGE: fraud-risk-training-sagemaker:local
+  terraform:
+    runs-on: ubuntu-latest
+    # Validation, mocked-provider tests, tflint, and checkov; no AWS credentials.
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.14.8
+      - run: make infra-check
+  helm:
+    runs-on: ubuntu-latest
+    # Chart lint and schema validation of every rendered manifest; no cluster needed.
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-helm@v4
+        with:
+          version: v3.17.3
+      - run: make chart-check

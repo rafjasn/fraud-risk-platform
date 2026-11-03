@@ -1,0 +1,40 @@
+{
+  "plots": [
+    "monitoring.png"
+  ],
+  "schema_version": 1,
+  "simulation_clock": "2019-08-08T00:00:00",
+  "simulation_id": "0c2fdbba3baa4f88879de300a1248df5",
+  "windows": [
+    {
+      "alert_rate": 0.004596325659191971,
+      "average_precision": 0.41849569544644627,
+      "caught": 79,
+      "expected": {
+        "alert_rate": 0.004410143329658214,
+        "average_precision": 0.3478940918313967,
+        "precision": 0.1751592356687898,
+        "recall": 0.5116279069767442,
+        "recall_at_budget": 0.5255813953488372
+      },
+      "flagged": 676,
+      "frauds": 125,
+      "mature": 113512,
+      "pending": 33562,
+      "precision": 0.15369649805447472,
+      "recall": 0.632,
+      "recall_at_budget": 0.632,
+      "recipe_name": "xgboost_history",
+      "recorded_at_clock": "2019-07-08T00:00:00",
+      "rejected": {},
+      "release_id": "75c451f50e78a0f85033e74fed01762eab8c7a49d2b6cc3b2f21705e9a345307",
+      "replay_id": "5e3a6a15-0ff0-4b8b-8e6b-f426050f2d4a",
+      "review_budget": 0.005,
+      "transactions": 147074,
+      "window": [
+        "2019-07-08T00:00:00",
+        "2019-08-08T00:00:00"
+      ]
+    }
+  ]
+}

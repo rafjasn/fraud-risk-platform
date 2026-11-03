@@ -1,0 +1,31 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+/data/
+/artifacts/
+
+/mlflow.db*
+/mlartifacts/
+/mlruns/
+/state/
+/.demo-runs/
+.DS_Store
+.env
+/.coverage
+/htmlcov/
+
+# Terraform: providers, state, and local variables stay out of Git; the lock file is committed.
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+.tflint.d/
+infra/terraform/terraform.tfvars

@@ -1,0 +1,139 @@
+{
+  "recorded_on": "2026-10-03",
+  "source_revision": "ebb7cd68ee1897599568107740bc452104bbbaf8",
+  "source_sha256": "e9f589a0958f40d60f81b1a2e8428db86e00c05755caf44fb055827976c0efa2",
+  "method": "Stream the verified original CSV; aggregate transaction counts and final Yes labels by year/month for 2018 onward. No model was trained or scored for date selection.",
+  "quick_frauds_definition": "Fraud rows with User < 20; this is the loader smoke-test subset, not the default training population.",
+  "monthly": {
+    "2018-01": {
+      "rows": 146357,
+      "frauds": 145,
+      "quick_frauds": 15
+    },
+    "2018-02": {
+      "rows": 131276,
+      "frauds": 183,
+      "quick_frauds": 0
+    },
+    "2018-03": {
+      "rows": 146272,
+      "frauds": 229,
+      "quick_frauds": 0
+    },
+    "2018-04": {
+      "rows": 141688,
+      "frauds": 269,
+      "quick_frauds": 8
+    },
+    "2018-05": {
+      "rows": 145438,
+      "frauds": 167,
+      "quick_frauds": 0
+    },
+    "2018-06": {
+      "rows": 141827,
+      "frauds": 154,
+      "quick_frauds": 0
+    },
+    "2018-07": {
+      "rows": 146638,
+      "frauds": 156,
+      "quick_frauds": 0
+    },
+    "2018-08": {
+      "rows": 146983,
+      "frauds": 216,
+      "quick_frauds": 9
+    },
+    "2018-09": {
+      "rows": 141557,
+      "frauds": 262,
+      "quick_frauds": 0
+    },
+    "2018-10": {
+      "rows": 145473,
+      "frauds": 181,
+      "quick_frauds": 8
+    },
+    "2018-11": {
+      "rows": 141843,
+      "frauds": 300,
+      "quick_frauds": 0
+    },
+    "2018-12": {
+      "rows": 146263,
+      "frauds": 229,
+      "quick_frauds": 0
+    },
+    "2019-01": {
+      "rows": 146097,
+      "frauds": 203,
+      "quick_frauds": 0
+    },
+    "2019-02": {
+      "rows": 132102,
+      "frauds": 156,
+      "quick_frauds": 0
+    },
+    "2019-03": {
+      "rows": 147202,
+      "frauds": 215,
+      "quick_frauds": 9
+    },
+    "2019-04": {
+      "rows": 141409,
+      "frauds": 218,
+      "quick_frauds": 0
+    },
+    "2019-05": {
+      "rows": 145648,
+      "frauds": 260,
+      "quick_frauds": 11
+    },
+    "2019-06": {
+      "rows": 142399,
+      "frauds": 215,
+      "quick_frauds": 0
+    },
+    "2019-07": {
+      "rows": 146599,
+      "frauds": 156,
+      "quick_frauds": 0
+    },
+    "2019-08": {
+      "rows": 147139,
+      "frauds": 247,
+      "quick_frauds": 0
+    },
+    "2019-09": {
+      "rows": 141744,
+      "frauds": 142,
+      "quick_frauds": 0
+    },
+    "2019-10": {
+      "rows": 145074,
+      "frauds": 275,
+      "quick_frauds": 0
+    },
+    "2019-11": {
+      "rows": 141946,
+      "frauds": 0,
+      "quick_frauds": 0
+    },
+    "2019-12": {
+      "rows": 146579,
+      "frauds": 0,
+      "quick_frauds": 0
+    },
+    "2020-01": {
+      "rows": 170731,
+      "frauds": 0,
+      "quick_frauds": 0
+    },
+    "2020-02": {
+      "rows": 165769,
+      "frauds": 0,
+      "quick_frauds": 0
+    }
+  }
+}

@@ -1,0 +1,19 @@
+# Releases, deployment.json, and reports. Kept when the chart is uninstalled, like the
+# database, so a reinstall finds the deployed release again.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "frp.fullname" . }}-state
+  labels:
+    {{- include "frp.labels" (dict "ctx" $ "component" "state") | nindent 4 }}
+  annotations:
+    helm.sh/resource-policy: keep
+spec:
+  accessModes:
+    - {{ .Values.state.accessMode }}
+  {{- with .Values.state.storageClassName }}
+  storageClassName: {{ . | quote }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.state.size }}

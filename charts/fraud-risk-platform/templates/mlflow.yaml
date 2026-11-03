@@ -1,0 +1,99 @@
+{{- $host := include "frp.mlflowHost" . -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $host }}
+  labels:
+    {{- include "frp.labels" (dict "ctx" $ "component" "mlflow") | nindent 4 }}
+spec:
+  selector:
+    {{- include "frp.selectorLabels" (dict "ctx" $ "component" "mlflow") | nindent 4 }}
+  ports:
+    - name: http
+      port: 5000
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $host }}
+  labels:
+    {{- include "frp.labels" (dict "ctx" $ "component" "mlflow") | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "frp.selectorLabels" (dict "ctx" $ "component" "mlflow") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "frp.labels" (dict "ctx" $ "component" "mlflow") | nindent 8 }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+    spec:
+      serviceAccountName: {{ include "frp.fullname" . }}
+      securityContext:
+        {{- include "frp.podSecurityContext" . | nindent 8 }}
+      initContainers:
+        {{- include "frp.waitForPostgres" . | nindent 8 }}
+      containers:
+        - name: mlflow
+          image: {{ include "frp.image" .Values.images.training }}
+          imagePullPolicy: {{ .Values.images.training.pullPolicy }}
+          command: ["mlflow", "server"]
+          args:
+            - --host=0.0.0.0
+            - --port=5000
+            - --workers=1
+            - --backend-store-uri=$(MLFLOW_BACKEND_STORE_URI)
+            # Training writes its artifacts straight to S3; this serves any others.
+            - --artifacts-destination=/mlflow-artifacts
+            - --serve-artifacts
+            # MLflow rejects requests whose Host header it does not recognise.
+            - --allowed-hosts={{ $host }}:5000,{{ $host }}.{{ .Release.Namespace }}.svc.cluster.local:5000,localhost:*,127.0.0.1:*
+          envFrom:
+            - configMapRef:
+                name: {{ include "frp.fullname" . }}
+          env:
+            - name: MLFLOW_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "frp.secretName" . }}
+                  key: mlflow-app-password
+            - name: MLFLOW_BACKEND_STORE_URI
+              value: "postgresql+psycopg://mlflow_app:$(MLFLOW_DB_PASSWORD)@{{ include "frp.postgresHost" . }}:5432/mlflow"
+            {{- include "frp.awsEnv" . | nindent 12 }}
+          ports:
+            - name: http
+              containerPort: 5000
+          # The first start migrates MLflow's database schema.
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 5
+            failureThreshold: 60
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 20
+          resources:
+            {{- toYaml .Values.mlflow.resources | nindent 12 }}
+          securityContext:
+            {{- include "frp.containerSecurityContext" . | nindent 12 }}
+          volumeMounts:
+            - name: artifacts
+              mountPath: /mlflow-artifacts
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: artifacts
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}

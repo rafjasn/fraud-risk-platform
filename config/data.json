@@ -1,0 +1,17 @@
+{
+  "initial_snapshot": "2019-07-08",
+  "label_delay_days": 7,
+  "dataset": {
+    "schema_version": 1,
+    "dataset": "ibm-tabformer",
+    "train_start": "2018-01-01",
+    "context_days": 30,
+    "validation_days": 30,
+    "evaluation_days": 30,
+    "final_holdout_start": "2019-10-01",
+    "max_train_rows": 1000000,
+    "selection_seed": 42,
+    "minimum_rows_per_split": 100,
+    "minimum_frauds_per_split": 5
+  }
+}

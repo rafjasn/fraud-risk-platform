@@ -1,0 +1,269 @@
+name: fraud-risk-local
+
+x-runtime: &runtime
+  user: "${LOCAL_UID:-1000}:${LOCAL_GID:-1000}"
+  environment: &runtime-environment
+    DATABASE_URL: ${DATABASE_URL:-postgresql://platform_app:local-platform@postgres:5432/fraud_platform?connect_timeout=5}
+    SOURCE_DATABASE_URL: ${SOURCE_DATABASE_URL:-postgresql://source_app:local-source@postgres:5432/fraud_source?connect_timeout=5}
+    MLFLOW_TRACKING_URI: http://mlflow:5000
+    MLFLOW_ARTIFACT_URI: ${MLFLOW_ARTIFACT_URI:-s3://fraud-mlflow/training-v2}
+    MLFLOW_S3_ENDPOINT_URL: http://localstack:4566
+    MLFLOW_EXPERIMENT_NAME: ${MLFLOW_EXPERIMENT_NAME:-fraud-risk-training-v2}
+    TRAINING_IMAGE_ID: ${TRAINING_IMAGE_ID:-fraud-risk-training:local-unpinned}
+    STATE_DIR: /state
+    MLFLOW_DISABLE_AGENT_HINT: "1"
+    AWS_ENDPOINT_URL_S3: http://localstack:4566
+    AWS_ACCESS_KEY_ID: test
+    AWS_SECRET_ACCESS_KEY: test
+    AWS_DEFAULT_REGION: us-east-1
+    FRAUD_DATA_URI: ${FRAUD_DATA_URI:-s3://fraud-data}
+    FRAUD_DUCKDB_MEMORY_LIMIT: ${FRAUD_DUCKDB_MEMORY_LIMIT:-2GB}
+    MPLCONFIGDIR: /tmp/matplotlib
+  volumes:
+    - ${PROJECT_STATE_DIR:-./state}/platform:/state
+    - ${RAW_DATA_DIR:-./data/raw}:/app/data/raw
+  build:
+    context: .
+    target: training
+    args:
+      GIT_COMMIT: ${GIT_COMMIT:-unavailable}
+      GIT_DIRTY: ${GIT_DIRTY:-unavailable}
+  image: fraud-risk-training:local
+
+x-ingestion: &ingestion
+  <<: *runtime
+  build:
+    context: .
+    target: ingestion
+  image: fraud-risk-ingestion:local
+
+services:
+  localstack:
+    image: localstack/localstack:4.14.0
+    environment:
+      SERVICES: s3
+      PERSISTENCE: "0"
+      AWS_DEFAULT_REGION: us-east-1
+      FRAUD_DATA_BUCKET: ${FRAUD_DATA_BUCKET:-fraud-data}
+    ports:
+      - "127.0.0.1:${LOCALSTACK_PORT:-4566}:4566"
+    volumes:
+      - ./infra/localstack/init.sh:/etc/localstack/init/ready.d/init.sh:ro
+    healthcheck:
+      test: [CMD-SHELL, 'awslocal s3api head-bucket --bucket "$$FRAUD_DATA_BUCKET" >/dev/null 2>&1']
+      interval: 3s
+      timeout: 5s
+      retries: 60
+
+  postgres:
+    image: postgres:17.6-bookworm
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5433}:5432"
+    environment:
+      POSTGRES_USER: fraud
+      POSTGRES_PASSWORD: fraud
+      POSTGRES_DB: fraud
+    volumes:
+      - postgres:/var/lib/postgresql/data
+      - ./infra/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -h 127.0.0.1 -U fraud -d fraud"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+  db-provision:
+    image: postgres:17.6-bookworm
+    environment:
+      PGHOST: postgres
+      PGUSER: fraud
+      PGPASSWORD: fraud
+      PGDATABASE: fraud
+    volumes:
+      - ./infra/postgres/init:/docker-entrypoint-initdb.d:ro
+    entrypoint: [psql]
+    command: [-X, --set=ON_ERROR_STOP=1, --file=/docker-entrypoint-initdb.d/01-databases.sql]
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  init:
+    <<: *ingestion
+    command: [init-db]
+    depends_on:
+      db-provision:
+        condition: service_completed_successfully
+
+  mlflow:
+    <<: *runtime
+    environment:
+      MLFLOW_DISABLE_AGENT_HINT: "1"
+      MLFLOW_S3_ENDPOINT_URL: http://localstack:4566
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_DEFAULT_REGION: us-east-1
+    entrypoint: [mlflow, server]
+    command:
+      - --host=0.0.0.0
+      - --port=5000
+      - --workers=1
+      - --backend-store-uri=${MLFLOW_BACKEND_STORE_URI:-postgresql+psycopg://mlflow_app:local-mlflow@postgres:5432/mlflow}
+      - --artifacts-destination=/mlflow-artifacts
+      - --serve-artifacts
+      - --allowed-hosts=mlflow:5000,localhost:*,127.0.0.1:*
+    ports:
+      - "127.0.0.1:${MLFLOW_PORT:-5001}:5000"
+    volumes:
+      - ${PROJECT_STATE_DIR:-./state}/mlflow:/mlflow-artifacts
+    depends_on:
+      init:
+        condition: service_completed_successfully
+      localstack:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 3s
+      timeout: 5s
+      retries: 40
+
+  jobs:
+    <<: *runtime
+    profiles: [jobs]
+    environment:
+      <<: *runtime-environment
+      # Training only: tree and logistic fits measured 1.4-1.75x faster with 6 threads
+      # than the images' default 2, with unchanged results; the MLP pins PyTorch to 2.
+      OMP_NUM_THREADS: ${TRAINING_THREADS:-6}
+      OPENBLAS_NUM_THREADS: ${TRAINING_THREADS:-6}
+      # Load-test reports link here; it is a host URL for the reader's browser.
+      GRAFANA_URL: http://127.0.0.1:${GRAFANA_PORT:-3000}
+    depends_on:
+      mlflow:
+        condition: service_healthy
+      localstack:
+        condition: service_healthy
+
+  data-jobs:
+    <<: *ingestion
+    profiles: [jobs]
+    environment:
+      <<: *runtime-environment
+      SOURCE_DATABASE_URL: ${SOURCE_READ_DATABASE_URL:-postgresql://source_reader:local-source-reader@postgres:5432/fraud_source?connect_timeout=5}
+    depends_on:
+      init:
+        condition: service_completed_successfully
+      localstack:
+        condition: service_healthy
+
+  source-loader:
+    <<: *ingestion
+    profiles: [jobs]
+    environment:
+      SOURCE_DATABASE_URL: ${SOURCE_DATABASE_URL:-postgresql://source_app:local-source@postgres:5432/fraud_source?connect_timeout=5}
+      MLFLOW_DISABLE_AGENT_HINT: "1"
+    command: [seed-source]
+    depends_on:
+      init:
+        condition: service_completed_successfully
+
+  api:
+    build:
+      context: .
+      target: serving
+    image: fraud-risk-serving:local
+    user: "${LOCAL_UID:-1000}:${LOCAL_GID:-1000}"
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql://platform_app:local-platform@postgres:5432/fraud_platform?connect_timeout=5}
+      SOURCE_DATABASE_URL: ${SOURCE_READ_DATABASE_URL:-postgresql://source_reader:local-source-reader@postgres:5432/fraud_source?connect_timeout=5}
+      STATE_DIR: /state
+      MODEL_RELEASE_ID: ${MODEL_RELEASE_ID:-}
+    volumes:
+      - ${PROJECT_STATE_DIR:-./state}/platform:/state:ro
+    ports:
+      - "127.0.0.1:${API_PORT:-8000}:8000"
+    depends_on:
+      init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Scrapes the API's /metrics; the API keeps serving whether or not this runs.
+  prometheus:
+    image: prom/prometheus:v3.15.0
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=30d
+    volumes:
+      - ./infra/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus:/prometheus
+    ports:
+      - "127.0.0.1:${PROMETHEUS_PORT:-9090}:9090"
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, http://localhost:9090/-/ready]
+      interval: 3s
+      timeout: 5s
+      retries: 20
+
+  # Provisioned read-only: the Prometheus data source and the Fraud API dashboard.
+  grafana:
+    image: grafana/grafana:13.2.3
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-local-grafana}
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /etc/grafana/dashboards/fraud-api.json
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+      GF_NEWS_NEWS_FEED_ENABLED: "false"
+    volumes:
+      - ./infra/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./infra/grafana/dashboards:/etc/grafana/dashboards:ro
+    ports:
+      - "127.0.0.1:${GRAFANA_PORT:-3000}:3000"
+    depends_on:
+      prometheus:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, http://localhost:3000/api/health]
+      interval: 3s
+      timeout: 5s
+      retries: 40
+
+  tests:
+    build:
+      context: .
+      target: test
+    image: fraud-risk-test:local
+    profiles: [test]
+    environment:
+      TEST_DATABASE_URL: postgresql://fraud:fraud@test-db:5432/fraud_test
+      TEST_S3_ENDPOINT_URL: http://localstack:4566
+      MPLCONFIGDIR: /tmp/matplotlib
+      MLFLOW_DISABLE_AGENT_HINT: "1"
+    depends_on:
+      test-db:
+        condition: service_healthy
+      localstack:
+        condition: service_healthy
+
+  test-db:
+    image: postgres:17.6-bookworm
+    profiles: [test]
+    environment:
+      POSTGRES_USER: fraud
+      POSTGRES_PASSWORD: fraud
+      POSTGRES_DB: fraud_test
+    tmpfs: [/var/lib/postgresql/data]
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U fraud -d fraud_test"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+volumes:
+  postgres:
+  prometheus:

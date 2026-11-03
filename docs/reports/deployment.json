@@ -1,0 +1,43 @@
+{
+  "current": "020564a33e19e303fc69012040588d46a8fe6cb7e916956db09dbfc2d05aa10f",
+  "deployed": "020564a33e19e303fc69012040588d46a8fe6cb7e916956db09dbfc2d05aa10f",
+  "history": [
+    {
+      "action": "initial",
+      "at": "2026-10-19T14:57:53.181925+00:00",
+      "from": null,
+      "reason": "Manual operator promotion",
+      "to": "75c451f50e78a0f85033e74fed01762eab8c7a49d2b6cc3b2f21705e9a345307"
+    },
+    {
+      "action": "confirmed",
+      "at": "2026-10-19T14:58:06.394804+00:00",
+      "to": "75c451f50e78a0f85033e74fed01762eab8c7a49d2b6cc3b2f21705e9a345307"
+    },
+    {
+      "action": "promote",
+      "at": "2026-10-19T15:46:50.435831+00:00",
+      "from": "75c451f50e78a0f85033e74fed01762eab8c7a49d2b6cc3b2f21705e9a345307",
+      "reason": "Manual operator promotion",
+      "to": "1798983a06d52cca7fabd8f8a40d71234bdcadd39cd766b18b516a25fb200afa"
+    },
+    {
+      "action": "confirmed",
+      "at": "2026-10-19T15:47:01.120700+00:00",
+      "to": "1798983a06d52cca7fabd8f8a40d71234bdcadd39cd766b18b516a25fb200afa"
+    },
+    {
+      "action": "promote",
+      "at": "2026-10-19T16:36:18.340952+00:00",
+      "from": "1798983a06d52cca7fabd8f8a40d71234bdcadd39cd766b18b516a25fb200afa",
+      "reason": "Manual operator promotion",
+      "to": "020564a33e19e303fc69012040588d46a8fe6cb7e916956db09dbfc2d05aa10f"
+    },
+    {
+      "action": "confirmed",
+      "at": "2026-10-19T16:36:31.428149+00:00",
+      "to": "020564a33e19e303fc69012040588d46a8fe6cb7e916956db09dbfc2d05aa10f"
+    }
+  ],
+  "schema_version": 1
+}

@@ -1,0 +1,21 @@
+The fraud risk platform is installed as release {{ .Release.Name }} in namespace {{ .Release.Namespace }}.
+
+The API reports itself unready until a release is deployed. Run the simulation from the
+repository root; each command runs as a Kubernetes Job:
+
+  make k8s-task ARGS=seed-source               # once: download and load the IBM data
+  make k8s-task ARGS=initial-snapshot
+  make k8s-month                               # train the first cycle
+  make k8s-promote RELEASE=<release-id> INITIAL=--initial
+  make k8s-month                               # each further month; promote when recommended
+
+Reach the services from your machine:
+
+  kubectl --namespace {{ .Release.Namespace }} port-forward service/{{ include "frp.apiHost" . }} 8000:8000
+  kubectl --namespace {{ .Release.Namespace }} port-forward service/{{ include "frp.mlflowHost" . }} 5000:5000
+
+{{- if not .Values.credentials.existingSecret }}
+
+WARNING: the database passwords are the local development defaults from values.yaml.
+Outside a local cluster, set credentials.existingSecret.
+{{- end }}

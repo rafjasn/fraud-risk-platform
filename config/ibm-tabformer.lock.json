@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "dataset": "ibm-tabformer",
+  "repository": "https://github.com/IBM/TabFormer",
+  "revision": "ebb7cd68ee1897599568107740bc452104bbbaf8",
+  "url": "https://media.githubusercontent.com/media/IBM/TabFormer/ebb7cd68ee1897599568107740bc452104bbbaf8/data/credit_card/transactions.tgz",
+  "filename": "transactions.tgz",
+  "bytes": 278576638,
+  "sha256": "e9f589a0958f40d60f81b1a2e8428db86e00c05755caf44fb055827976c0efa2",
+  "csv_member": "card_transaction.v1.csv",
+  "csv_bytes": 2354626737,
+  "row_count": 24386900,
+  "license_url": "https://github.com/IBM/TabFormer/blob/ebb7cd68ee1897599568107740bc452104bbbaf8/LICENSE",
+  "fallback_url": "https://ibm.box.com/v/tabformer-data",
+  "verification": "Archive size and SHA-256 match the Git LFS pointer at the pinned revision. The downloaded archive was verified before inspection."
+}

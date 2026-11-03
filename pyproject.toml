@@ -1,0 +1,89 @@
+[project]
+name = "fraud-risk-platform"
+version = "0.1.0"
+description = "A reproducible local fraud detection and model lifecycle reference"
+readme = "README.md"
+authors = [
+    { name = "Rafal Jasnos", email = "rafal10y6@gmail.com" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "numpy>=2.5.3",
+    "pandas>=3.0.5",
+    "pydantic>=2.13.5",
+    "psycopg[binary]>=3.3.3",
+]
+
+[project.optional-dependencies]
+data = ["boto3>=1.40", "pyarrow>=25.0.1", "matplotlib>=3.10", "duckdb>=1.5.6"]
+serving = [
+    "scikit-learn>=1.9.1",
+    "joblib>=1.5.3",
+    # The CPU-only Linux build avoids NVIDIA NCCL in images; macOS wheels are CPU-only.
+    "xgboost-cpu>=3.4.1; sys_platform == 'linux'",
+    "xgboost>=3.4.1; sys_platform != 'linux'",
+    # Neural releases are served as ONNX, so serving never installs PyTorch.
+    "onnxruntime>=1.30.0",
+    "fastapi>=0.141.1",
+    "uvicorn>=0.53.0",
+    "prometheus-client>=0.26.0",
+    "psycopg-pool>=3.2",
+]
+training = [
+    "optuna>=5.0,<6",
+    "scikit-learn>=1.9.1",
+    "joblib>=1.5.3",
+    # The CPU-only Linux build avoids NVIDIA NCCL in images; macOS wheels are CPU-only.
+    "xgboost-cpu>=3.4.1; sys_platform == 'linux'",
+    "xgboost>=3.4.1; sys_platform != 'linux'",
+    "torch>=2.14.0",
+    "onnx>=1.23.0",
+    "onnxscript>=0.7.2",
+    "onnxruntime>=1.30.0",
+    "mlflow>=3.16.1",
+    "pyarrow>=25.0.1",
+    "prometheus-client>=0.26.0",
+]
+
+[project.scripts]
+fraud-risk-platform = "fraud_risk_platform.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.12.15,<0.13.0"]
+build-backend = "uv_build"
+
+# CPU-only PyTorch: the MLP is small, and CUDA builds added ~6 GB to the training
+# image. A GPU build would be a separate image, not a change to this one.
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }
+
+[dependency-groups]
+dev = [
+    "httpx2>=2.13.0",
+    "pytest>=9.1.1",
+    "ruff>=0.16.8",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["integration: requires dedicated PostgreSQL and, for IBM snapshots, LocalStack S3"]
+norecursedirs = [
+    "mlartifacts",
+    "mlruns",
+    "artifacts",
+    "data",
+    ".venv",
+    ".git",
+    "__pycache__",
+]
+
+[tool.ruff]
+target-version = "py314"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]

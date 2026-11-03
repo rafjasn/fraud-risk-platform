@@ -1,0 +1,173 @@
+{
+  "as_of": "2019-08-08",
+  "classes": [
+    0,
+    1
+  ],
+  "comparison": ">=",
+  "dataset": "ibm-tabformer",
+  "evaluation": {
+    "candidate": {
+      "alert_rate": 0.004568628281715601,
+      "average_precision": 0.4471719663314953,
+      "false_negatives": 54,
+      "false_positives": 547,
+      "flagged_transactions": 647,
+      "frauds": 154,
+      "precision": 0.1545595054095827,
+      "precision_at_top_0.1pct": 0.5106382978723404,
+      "precision_at_top_0.5pct": 0.1440677966101695,
+      "precision_at_top_1pct": 0.07768361581920905,
+      "prevalence": 0.00108743238853818,
+      "recall": 0.6493506493506493,
+      "recall_at_top_0.1pct": 0.4675324675324675,
+      "recall_at_top_0.5pct": 0.6623376623376623,
+      "recall_at_top_1pct": 0.7142857142857143,
+      "roc_auc": 0.9838159687821086,
+      "rows": 141618,
+      "true_negatives": 140917,
+      "true_positives": 100
+    },
+    "incumbent": {
+      "alert_rate": 0.004321484557047833,
+      "average_precision": 0.4288446581809576,
+      "false_negatives": 57,
+      "false_positives": 515,
+      "flagged_transactions": 612,
+      "frauds": 154,
+      "precision": 0.15849673202614378,
+      "precision_at_top_0.1pct": 0.475177304964539,
+      "precision_at_top_0.5pct": 0.1384180790960452,
+      "precision_at_top_1pct": 0.07838983050847458,
+      "prevalence": 0.00108743238853818,
+      "recall": 0.6298701298701299,
+      "recall_at_top_0.1pct": 0.43506493506493504,
+      "recall_at_top_0.5pct": 0.6363636363636364,
+      "recall_at_top_1pct": 0.7207792207792207,
+      "roc_auc": 0.9823056262857202,
+      "rows": 141618,
+      "true_negatives": 140949,
+      "true_positives": 97
+    }
+  },
+  "feature_spec": {
+    "categorical": [
+      "use_chip",
+      "mcc",
+      "day_of_week"
+    ],
+    "numeric": [
+      "amount",
+      "log_abs_amount",
+      "is_refund",
+      "hour_sin",
+      "hour_cos",
+      "card_count_1h",
+      "card_count_24h",
+      "card_count_7d",
+      "card_amount_sum_24h",
+      "amount_vs_card_mean_30d",
+      "hours_since_card_last",
+      "new_merchant_for_card_30d",
+      "new_mcc_for_card_30d",
+      "card_confirmed_frauds_30d"
+    ],
+    "version": "history-v1"
+  },
+  "feature_spec_sha256": "01f913ade8013a70cdd6b9e3db08b2995ebd19b15e8ad71e71f87ffa42f66233",
+  "feature_version": "history-v1",
+  "features": [
+    "amount",
+    "log_abs_amount",
+    "is_refund",
+    "hour_sin",
+    "hour_cos",
+    "card_count_1h",
+    "card_count_24h",
+    "card_count_7d",
+    "card_amount_sum_24h",
+    "amount_vs_card_mean_30d",
+    "hours_since_card_last",
+    "new_merchant_for_card_30d",
+    "new_mcc_for_card_30d",
+    "card_confirmed_frauds_30d",
+    "use_chip",
+    "mcc",
+    "day_of_week"
+  ],
+  "files": {
+    "model.joblib": "04ecdca1c07cd4a8e03009c6725cc915ac3b15da5e0497c43ca7ab9f5e29010e",
+    "verification.json": "c1b10587c89f5a7b6c69aa0185f7f9c6ba6da1322db43765b3072d3117bbde28"
+  },
+  "incumbent_release_id": "75c451f50e78a0f85033e74fed01762eab8c7a49d2b6cc3b2f21705e9a345307",
+  "information_end_exclusive": "2019-08-01T00:00:00",
+  "model_uri": "models:/m-0f6d2d4c24d5475cb2c4bc4f9690a9eb",
+  "promotion_eligible": true,
+  "recipe": {
+    "estimator": "xgboost",
+    "feature_set": "card_history",
+    "feature_spec": {
+      "categorical": [
+        "use_chip",
+        "mcc",
+        "day_of_week"
+      ],
+      "numeric": [
+        "amount",
+        "log_abs_amount",
+        "is_refund",
+        "hour_sin",
+        "hour_cos",
+        "card_count_1h",
+        "card_count_24h",
+        "card_count_7d",
+        "card_amount_sum_24h",
+        "amount_vs_card_mean_30d",
+        "hours_since_card_last",
+        "new_merchant_for_card_30d",
+        "new_mcc_for_card_30d",
+        "card_confirmed_frauds_30d"
+      ],
+      "version": "history-v1"
+    },
+    "numeric_encoding": "standard",
+    "parameters": {
+      "colsample_bytree": 0.8,
+      "learning_rate": 0.02118579108602751,
+      "max_depth": 9,
+      "min_child_weight": 5.914609632764616,
+      "n_estimators": 1599,
+      "random_state": 42,
+      "reg_lambda": 7.574178428984486,
+      "subsample": 0.8,
+      "tree_method": "hist"
+    },
+    "search_space": {}
+  },
+  "recipe_name": "xgboost_history",
+  "recommendation": "promote",
+  "registry": {
+    "name": "fraud-risk",
+    "uri": "models:/fraud-risk/2",
+    "version": "2"
+  },
+  "release_id": "1798983a06d52cca7fabd8f8a40d71234bdcadd39cd766b18b516a25fb200afa",
+  "resolved_config_sha256": "5a45575c828df6020115be2e1b61f5c2edbffae1c96d79ee1f37c09e7d0a27dc",
+  "review_budget": 0.005,
+  "runtime_versions": {
+    "joblib": "1.6.0",
+    "numpy": "2.5.3",
+    "pandas": "3.0.5",
+    "python": "3.14",
+    "scikit-learn": "1.9.1",
+    "xgboost": "3.4.1"
+  },
+  "schema_version": 2,
+  "search_snapshot_id": "01a7e35067e688f79bf4855d9ce3db2229dbe083de6ec2451f6ceb00e503cfb4",
+  "snapshot_id": "01a7e35067e688f79bf4855d9ce3db2229dbe083de6ec2451f6ceb00e503cfb4",
+  "source_import_id": "a8bfbe0e2255194a0a2044b5d22a3907d486f6a9a00d016b53826bd96b81e6a3",
+  "source_run_id": "d30dd9df2bdb49439d38a913036dcd1f",
+  "threshold": 0.026596717536449432,
+  "training_end_exclusive": "2019-06-02T00:00:00",
+  "trial_run_id": "c20f7cbd88324d7c8470431cf2b2e1c8"
+}

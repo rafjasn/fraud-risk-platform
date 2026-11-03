@@ -1,0 +1,158 @@
+# One PostgreSQL server holding the source, platform, and MLflow databases, each with its
+# own owner. The init script runs once, on an empty volume; it reads the role passwords
+# from the environment, so it contains none.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "frp.postgresHost" . }}-init
+  labels:
+    {{- include "frp.labels" (dict "ctx" $ "component" "postgres") | nindent 4 }}
+data:
+  01-databases.sql: |
+    \set ON_ERROR_STOP on
+    \getenv source_app_password SOURCE_APP_PASSWORD
+    \getenv source_reader_password SOURCE_READER_PASSWORD
+    \getenv platform_app_password PLATFORM_APP_PASSWORD
+    \getenv mlflow_app_password MLFLOW_APP_PASSWORD
+
+    SELECT format('CREATE ROLE %I LOGIN PASSWORD %L', name, password)
+    FROM (VALUES
+        ('source_app', :'source_app_password'),
+        ('source_reader', :'source_reader_password'),
+        ('platform_app', :'platform_app_password'),
+        ('mlflow_app', :'mlflow_app_password')
+    ) AS roles(name, password)
+    WHERE NOT EXISTS (SELECT FROM pg_roles WHERE rolname = name)
+    \gexec
+
+    SELECT format('CREATE DATABASE %I OWNER %I', name, owner)
+    FROM (VALUES
+        ('fraud_source', 'source_app'),
+        ('fraud_platform', 'platform_app'),
+        ('mlflow', 'mlflow_app')
+    ) AS databases(name, owner)
+    WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = name)
+    \gexec
+
+    REVOKE ALL ON DATABASE fraud_source FROM PUBLIC;
+    REVOKE ALL ON DATABASE fraud_platform FROM PUBLIC;
+    REVOKE ALL ON DATABASE mlflow FROM PUBLIC;
+    GRANT CONNECT ON DATABASE fraud_source TO source_reader;
+
+    \connect fraud_source
+    GRANT USAGE ON SCHEMA public TO source_reader;
+    GRANT SELECT ON ALL TABLES IN SCHEMA public TO source_reader;
+    ALTER DEFAULT PRIVILEGES FOR ROLE source_app IN SCHEMA public
+        GRANT SELECT ON TABLES TO source_reader;
+---
+# Headless: the StatefulSet's network identity, and the address clients connect to.
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "frp.postgresHost" . }}
+  labels:
+    {{- include "frp.labels" (dict "ctx" $ "component" "postgres") | nindent 4 }}
+spec:
+  clusterIP: None
+  selector:
+    {{- include "frp.selectorLabels" (dict "ctx" $ "component" "postgres") | nindent 4 }}
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: postgres
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "frp.postgresHost" . }}
+  labels:
+    {{- include "frp.labels" (dict "ctx" $ "component" "postgres") | nindent 4 }}
+spec:
+  serviceName: {{ include "frp.postgresHost" . }}
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "frp.selectorLabels" (dict "ctx" $ "component" "postgres") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "frp.labels" (dict "ctx" $ "component" "postgres") | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "frp.fullname" . }}
+      # The official image runs as its postgres user (uid 999).
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        runAsGroup: 999
+        fsGroup: 999
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: postgres
+          image: {{ include "frp.image" .Values.images.postgres }}
+          imagePullPolicy: {{ .Values.images.postgres.pullPolicy }}
+          env:
+            - name: POSTGRES_USER
+              value: fraud
+            - name: POSTGRES_DB
+              value: fraud
+            # A subdirectory, so initdb owns it whatever the volume's root ownership is.
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+            {{- $secret := include "frp.secretName" . }}
+            {{- range $variable, $key := dict "POSTGRES_PASSWORD" "postgres-password" "SOURCE_APP_PASSWORD" "source-app-password" "SOURCE_READER_PASSWORD" "source-reader-password" "PLATFORM_APP_PASSWORD" "platform-app-password" "MLFLOW_APP_PASSWORD" "mlflow-app-password" }}
+            - name: {{ $variable }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $secret }}
+                  key: {{ $key }}
+            {{- end }}
+          ports:
+            - name: postgres
+              containerPort: 5432
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "--host=127.0.0.1", "--username=fraud", "--dbname=fraud"]
+            periodSeconds: 5
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "--host=127.0.0.1", "--username=fraud", "--dbname=fraud"]
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          resources:
+            {{- toYaml .Values.postgres.resources | nindent 12 }}
+          securityContext:
+            {{- include "frp.containerSecurityContext" . | nindent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+            - name: init
+              mountPath: /docker-entrypoint-initdb.d
+              readOnly: true
+            - name: run
+              mountPath: /var/run/postgresql
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: init
+          configMap:
+            name: {{ include "frp.postgresHost" . }}-init
+        - name: run
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
+  # A claim template cannot change after creation, so it carries only the stable labels.
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+        labels:
+          {{- include "frp.selectorLabels" (dict "ctx" $ "component" "postgres") | nindent 10 }}
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        {{- with .Values.postgres.storage.storageClassName }}
+        storageClassName: {{ . | quote }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.postgres.storage.size }}

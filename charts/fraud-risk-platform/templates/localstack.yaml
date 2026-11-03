@@ -1,0 +1,100 @@
+# S3 for snapshots, reports, and MLflow artifacts. LocalStack keeps it in memory, so a
+# restart empties it; `initial-snapshot` then rebuilds from the source database.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "frp.localstackHost" . }}-init
+  labels:
+    {{- include "frp.labels" (dict "ctx" $ "component" "localstack") | nindent 4 }}
+data:
+  create-buckets.sh: |
+    #!/bin/sh
+    set -eu
+    for bucket in "$FRAUD_DATA_BUCKET" "$FRAUD_MLFLOW_BUCKET"; do
+        if ! awslocal s3api head-bucket --bucket "$bucket" >/dev/null 2>&1; then
+            awslocal s3api create-bucket --bucket "$bucket"
+        fi
+    done
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "frp.localstackHost" . }}
+  labels:
+    {{- include "frp.labels" (dict "ctx" $ "component" "localstack") | nindent 4 }}
+spec:
+  selector:
+    {{- include "frp.selectorLabels" (dict "ctx" $ "component" "localstack") | nindent 4 }}
+  ports:
+    - name: s3
+      port: 4566
+      targetPort: s3
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "frp.localstackHost" . }}
+  labels:
+    {{- include "frp.labels" (dict "ctx" $ "component" "localstack") | nindent 4 }}
+spec:
+  replicas: 1
+  # Two instances would hold two different in-memory stores.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "frp.selectorLabels" (dict "ctx" $ "component" "localstack") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "frp.labels" (dict "ctx" $ "component" "localstack") | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "frp.fullname" . }}
+      # The LocalStack image starts as root and needs a writable filesystem; as a local
+      # emulator it keeps its defaults, without privilege escalation.
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: localstack
+          image: {{ include "frp.image" .Values.images.localstack }}
+          imagePullPolicy: {{ .Values.images.localstack.pullPolicy }}
+          env:
+            - name: SERVICES
+              value: s3
+            - name: PERSISTENCE
+              value: "0"
+            - name: AWS_DEFAULT_REGION
+              value: {{ .Values.localstack.region | quote }}
+            - name: FRAUD_DATA_BUCKET
+              value: {{ .Values.localstack.buckets.data | quote }}
+            - name: FRAUD_MLFLOW_BUCKET
+              value: {{ .Values.localstack.buckets.mlflow | quote }}
+          ports:
+            - name: s3
+              containerPort: 4566
+          # Ready once the buckets exist, not merely once the server answers.
+          readinessProbe:
+            exec:
+              command: ["awslocal", "s3api", "head-bucket", "--bucket", {{ .Values.localstack.buckets.data | quote }}]
+            periodSeconds: 5
+            timeoutSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /_localstack/health
+              port: s3
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          resources:
+            {{- toYaml .Values.localstack.resources | nindent 12 }}
+          securityContext:
+            allowPrivilegeEscalation: false
+          volumeMounts:
+            - name: init
+              mountPath: /etc/localstack/init/ready.d
+              readOnly: true
+      volumes:
+        - name: init
+          configMap:
+            name: {{ include "frp.localstackHost" . }}-init
+            defaultMode: 0755

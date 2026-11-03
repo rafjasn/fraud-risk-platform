@@ -1,0 +1,9 @@
+# Copy to terraform.tfvars (ignored by Git) and adjust.
+account_id = "123456789012"
+image_tag  = "0123abc"
+
+# region              = "eu-central-1"
+# availability_zones  = ["eu-central-1a", "eu-central-1b"]
+# environment         = "dev"
+# api_certificate_arn = "arn:aws:acm:eu-central-1:123456789012:certificate/..."
+# deletion_protection = false  # only for disposable environments

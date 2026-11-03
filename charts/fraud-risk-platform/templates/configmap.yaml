@@ -1,0 +1,26 @@
+# Non-secret settings shared by the API, MLflow, and every command Job.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "frp.fullname" . }}
+  labels:
+    {{- include "frp.labels" (dict "ctx" $ "component" "platform") | nindent 4 }}
+data:
+  STATE_DIR: /state
+  # The images have no home directory; libraries that cache under HOME use /tmp.
+  HOME: /tmp
+  MPLCONFIGDIR: /tmp/matplotlib
+  API_URL: http://{{ include "frp.apiHost" . }}:8000
+  FRAUD_DATA_URI: s3://{{ .Values.localstack.buckets.data }}
+  AWS_ENDPOINT_URL_S3: http://{{ include "frp.localstackHost" . }}:4566
+  AWS_DEFAULT_REGION: {{ .Values.localstack.region | quote }}
+  MLFLOW_TRACKING_URI: http://{{ include "frp.mlflowHost" . }}:5000
+  MLFLOW_ARTIFACT_URI: {{ .Values.mlflow.artifactUri | quote }}
+  MLFLOW_S3_ENDPOINT_URL: http://{{ include "frp.localstackHost" . }}:4566
+  MLFLOW_EXPERIMENT_NAME: {{ .Values.mlflow.experiment | quote }}
+  MLFLOW_DISABLE_AGENT_HINT: "1"
+  FRAUD_DUCKDB_MEMORY_LIMIT: {{ .Values.jobs.duckdbMemoryLimit | quote }}
+  OMP_NUM_THREADS: {{ .Values.jobs.threads | quote }}
+  OPENBLAS_NUM_THREADS: {{ .Values.jobs.threads | quote }}
+  # Recorded with every training run and part of each training job's identity.
+  TRAINING_IMAGE_ID: {{ include "frp.image" .Values.images.training | quote }}

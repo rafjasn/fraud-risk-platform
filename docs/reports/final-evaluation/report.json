@@ -1,0 +1,189 @@
+{
+  "champion": "020564a33e19e303fc69012040588d46a8fe6cb7e916956db09dbfc2d05aa10f",
+  "frauds": 275,
+  "plots": [
+    "comparison.png"
+  ],
+  "provenance": {
+    "git_commit": "1d43c374c8c780ea6e56240a670b5c5f0710db71",
+    "working_tree_dirty": true
+  },
+  "releases": [
+    {
+      "as_of": "2019-07-08",
+      "champion_lead_interval": [
+        -0.02307915057915061,
+        0.028573988735279065
+      ],
+      "evaluation": {
+        "alert_rate": 0.004410143329658214,
+        "average_precision": 0.3478940918313967,
+        "false_negatives": 105,
+        "false_positives": 518,
+        "flagged_transactions": 628,
+        "frauds": 215,
+        "precision": 0.1751592356687898,
+        "precision_at_top_0.1pct": 0.49295774647887325,
+        "precision_at_top_0.5pct": 0.1589310829817159,
+        "precision_at_top_1pct": 0.09135628952916373,
+        "prevalence": 0.001509842063497637,
+        "recall": 0.5116279069767442,
+        "recall_at_top_0.1pct": 0.32558139534883723,
+        "recall_at_top_0.5pct": 0.5255813953488372,
+        "recall_at_top_1pct": 0.6046511627906976,
+        "roc_auc": 0.9762644604632844,
+        "rows": 142399,
+        "true_negatives": 141666,
+        "true_positives": 110
+      },
+      "holdout": {
+        "alert_rate": 0.004818230696058563,
+        "average_precision": 0.44438326751327595,
+        "false_negatives": 105,
+        "false_positives": 529,
+        "flagged_transactions": 699,
+        "frauds": 275,
+        "precision": 0.24320457796852646,
+        "precision_at_top_0.1pct": 0.6620689655172414,
+        "precision_at_top_0.5pct": 0.23586206896551723,
+        "precision_at_top_1pct": 0.1310344827586207,
+        "prevalence": 0.001895584322483698,
+        "recall": 0.6181818181818182,
+        "recall_at_top_0.1pct": 0.3490909090909091,
+        "recall_at_top_0.5pct": 0.6218181818181818,
+        "recall_at_top_1pct": 0.6909090909090909,
+        "roc_auc": 0.9788980461316596,
+        "rows": 145074,
+        "true_negatives": 144270,
+        "true_positives": 170
+      },
+      "recall_interval": [
+        0.5653710247349824,
+        0.6771717043434087
+      ],
+      "recipe_name": "xgboost_history",
+      "release_id": "75c451f50e78a0f85033e74fed01762eab8c7a49d2b6cc3b2f21705e9a345307",
+      "role": "earlier",
+      "threshold": 0.03415146842598915
+    },
+    {
+      "as_of": "2019-08-08",
+      "champion_lead_interval": [
+        -0.028170433893684652,
+        0.029416602167182664
+      ],
+      "evaluation": {
+        "alert_rate": 0.004568628281715601,
+        "average_precision": 0.4471719663314953,
+        "false_negatives": 54,
+        "false_positives": 547,
+        "flagged_transactions": 647,
+        "frauds": 154,
+        "precision": 0.1545595054095827,
+        "precision_at_top_0.1pct": 0.5106382978723404,
+        "precision_at_top_0.5pct": 0.1440677966101695,
+        "precision_at_top_1pct": 0.07768361581920905,
+        "prevalence": 0.00108743238853818,
+        "recall": 0.6493506493506493,
+        "recall_at_top_0.1pct": 0.4675324675324675,
+        "recall_at_top_0.5pct": 0.6623376623376623,
+        "recall_at_top_1pct": 0.7142857142857143,
+        "roc_auc": 0.9838159687821086,
+        "rows": 141618,
+        "true_negatives": 140917,
+        "true_positives": 100
+      },
+      "holdout": {
+        "alert_rate": 0.005404138577553524,
+        "average_precision": 0.4631198397947515,
+        "false_negatives": 100,
+        "false_positives": 609,
+        "flagged_transactions": 784,
+        "frauds": 275,
+        "precision": 0.22321428571428573,
+        "precision_at_top_0.1pct": 0.6689655172413793,
+        "precision_at_top_0.5pct": 0.23448275862068965,
+        "precision_at_top_1pct": 0.13241379310344828,
+        "prevalence": 0.001895584322483698,
+        "recall": 0.6363636363636364,
+        "recall_at_top_0.1pct": 0.3527272727272727,
+        "recall_at_top_0.5pct": 0.6181818181818182,
+        "recall_at_top_1pct": 0.6981818181818182,
+        "roc_auc": 0.9805433111353732,
+        "rows": 145074,
+        "true_negatives": 144190,
+        "true_positives": 175
+      },
+      "recall_interval": [
+        0.57092166344294,
+        0.6771954288110715
+      ],
+      "recipe_name": "xgboost_history",
+      "release_id": "1798983a06d52cca7fabd8f8a40d71234bdcadd39cd766b18b516a25fb200afa",
+      "role": "earlier",
+      "threshold": 0.026596717536449432
+    },
+    {
+      "as_of": "2019-09-08",
+      "evaluation": {
+        "alert_rate": 0.00567466651665483,
+        "average_precision": 0.40698986813001947,
+        "false_negatives": 92,
+        "false_positives": 664,
+        "flagged_transactions": 807,
+        "frauds": 235,
+        "precision": 0.1771995043370508,
+        "precision_at_top_0.1pct": 0.5633802816901409,
+        "precision_at_top_0.5pct": 0.19831223628691982,
+        "precision_at_top_1pct": 0.11462728551336146,
+        "prevalence": 0.0016524741405376517,
+        "recall": 0.6085106382978723,
+        "recall_at_top_0.1pct": 0.3404255319148936,
+        "recall_at_top_0.5pct": 0.6,
+        "recall_at_top_1pct": 0.6936170212765957,
+        "roc_auc": 0.9834035180054406,
+        "rows": 142211,
+        "true_negatives": 141312,
+        "true_positives": 143
+      },
+      "holdout": {
+        "alert_rate": 0.005659180831851331,
+        "average_precision": 0.46067916420936234,
+        "false_negatives": 101,
+        "false_positives": 647,
+        "flagged_transactions": 821,
+        "frauds": 275,
+        "precision": 0.21193666260657734,
+        "precision_at_top_0.1pct": 0.6827586206896552,
+        "precision_at_top_0.5pct": 0.23724137931034484,
+        "precision_at_top_1pct": 0.13586206896551725,
+        "prevalence": 0.001895584322483698,
+        "recall": 0.6327272727272727,
+        "recall_at_top_0.1pct": 0.36,
+        "recall_at_top_0.5pct": 0.6254545454545455,
+        "recall_at_top_1pct": 0.7163636363636363,
+        "roc_auc": 0.9831173620611394,
+        "rows": 145074,
+        "true_negatives": 144152,
+        "true_positives": 174
+      },
+      "recall_interval": [
+        0.5731192839214102,
+        0.6775907086492341
+      ],
+      "recipe_name": "boosting_history",
+      "release_id": "020564a33e19e303fc69012040588d46a8fe6cb7e916956db09dbfc2d05aa10f",
+      "role": "champion",
+      "threshold": 0.031275212981253186
+    }
+  ],
+  "review_budget": 0.005,
+  "rows": 145074,
+  "schema_version": 1,
+  "scored_at": "2026-10-19T17:41:48.728918+00:00",
+  "snapshot_id": "2c389fdc1f30dee813c313d4381cc6d0a1c270fccc5a78f836b6b5077fdcc2b3",
+  "window": [
+    "2019-10-01T00:00:00",
+    "2019-11-01T00:00:00"
+  ]
+}
